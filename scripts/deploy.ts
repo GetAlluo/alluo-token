@@ -1,30 +1,21 @@
-// We require the Hardhat Runtime Environment explicitly here. This is optional
-// but useful for running the script in a standalone fashion through `node <script>`.
-//
-// When running the script with `npx hardhat run <script>` you'll find the Hardhat
-// Runtime Environment's members available in the global scope.
 import { ethers } from "hardhat";
+import {AlluoToken__factory} from "../typechain"
 
-async function main() {
-  // Hardhat always runs the compile task when running scripts with its command
-  // line interface.
-  //
-  // If this script is run directly using `node` you may want to call compile
-  // manually to make sure everything is compiled
-  // await hre.run('compile');
+async function deploy() {
 
-  // We get the contract to deploy
-  const AlluoToken = await ethers.getContractFactory("AlluoToken__factory");
-  const alluoToken = await AlluoToken.deploy("0xfb7A51c6f6A5116Ac748C1aDF4D4682c3D50889E");
-
+   // We get the contract to deploy
+  const factory = await ethers.getContractFactory('AlluoToken') as AlluoToken__factory
+  
+  console.log("deploying on live chain")
+  const alluoToken = await factory.deploy("0xfb7A51c6f6A5116Ac748C1aDF4D4682c3D50889E");
+  console.log("AlluoToken deploying to:", alluoToken.address);
   await alluoToken.deployed();
-
-  console.log("AlluoToken deployed to:", alluoToken.address);
+  console.log("! deployed !");
 }
 
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
-main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+deploy()
+    .then(() => process.exit(0))
+    .catch(error => {
+        console.error(error);
+        process.exit(1);
+    });

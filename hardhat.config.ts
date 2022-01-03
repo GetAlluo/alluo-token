@@ -72,6 +72,12 @@ const config: HardhatUserConfig = {
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
+    kovan: {
+      url: process.env.KOVAN_URL || "",
+      accounts: {
+        mnemonic: process.env.MNEMONIC,
+      },
+    },
     rinkeby: {
       gas: 5000000,
       gasPrice: 20000000000,
