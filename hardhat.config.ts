@@ -53,7 +53,7 @@ const config: HardhatUserConfig = {
     settings: {
       optimizer: {
         enabled: true,
-        runs: 4294967295,
+        runs: 1000000,
       },
     },
   },
@@ -76,6 +76,14 @@ const config: HardhatUserConfig = {
       gas: 5000000,
       gasPrice: 20000000000,
       url: process.env.RINKEBY_URL || "",
+      accounts: {
+        mnemonic: process.env.MNEMONIC,
+      }
+    },
+    kovan: {
+      gas: 5000000,
+      gasPrice: 2500000007,
+      url: process.env.KOVAN_URL || "",
       accounts: {
         mnemonic: process.env.MNEMONIC,
       }

@@ -219,5 +219,5 @@ contract AlluoToken is ERC20, AccessControl, ERC20Permit, ERC20Votes {
     {
         super._burn(account, amount);
     }
-
+    
 }
