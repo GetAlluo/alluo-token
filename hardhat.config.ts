@@ -1,51 +1,16 @@
 import * as dotenv from "dotenv";
 
-import { HardhatUserConfig, task } from "hardhat/config";
+import { HardhatUserConfig } from "hardhat/config";
 import "@nomiclabs/hardhat-etherscan";
 import "@nomiclabs/hardhat-waffle";
 import "@typechain/hardhat";
 import "hardhat-gas-reporter";
 import "solidity-coverage";
 import 'hardhat-contract-sizer'
-import "./tasks"
+import './tasks'
+//import '@openzeppelin/hardhat-upgrades';
+
 dotenv.config();
-
-//       From Alluo Smart Contract Developers - Happy New Year!!!
-//
-//                                  |
-//                                \ ' /
-//                              -- (*) --
-//                                 >*<
-//                                >0<@<
-//                               >>>@<<*
-//                              >@>*<0<<<
-//                             >*>>@<<<@<<
-//                            >@>>0<<<*<<@<
-//                           >*>>0<<@<<<@<<<
-//                          >@>>*<<@<>*<<0<*<
-//            \*/          >0>>*<<@<>0><<*<@<<
-//        ___\\U//___     >*>>@><0<<*>>@><*<0<<
-//        |\\ | | \\|    >@>>0<*<0>>@<<0<<<*<@<<  
-//        | \\| | _(UU)_ >((*))_>0><*<0><@<<<0<*<
-//        |\ \| || / //||.*.*.*.|>>@<<*<<@>><0<<<
-//        |\\_|_|&&_// ||*.*.*.*|_\\db//_               
-//        """"|'.'.'.|~~|.*.*.*|     ____|_
-//            |'.'.'.|   ^^^^^^|____|>>>>>>|
-//            ~~~~~~~~         '""""`------'
-
-
-// This is a sample Hardhat task. To learn how to create your own go to
-// https://hardhat.org/guides/create-task.html
-task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
-  const accounts = await hre.ethers.getSigners();
-
-  for (const account of accounts) {
-    console.log(account.address);
-  }
-});
-
-// You need to export an object to set up your config
-// Go to https://hardhat.org/config/ to learn more
 
 const config: HardhatUserConfig = {
   solidity: {
@@ -62,15 +27,13 @@ const config: HardhatUserConfig = {
       accounts: {
         mnemonic: process.env.MNEMONIC,
       },
-      forking: {
-        url: "https://polygon-mainnet.g.alchemy.com/v2/6QuVBlBaST7y0SX7yjMc5kQjiT5HumAW",
-        blockNumber: 20094469
-      },
     },
-    ropsten: {
-      url: process.env.ROPSTEN_URL || "",
-      accounts:
-        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    mainnet: {
+      url: process.env.MAINNET_URL,
+      gasPrice: "auto",
+      accounts: {
+        mnemonic: process.env.MNEMONIC,
+      },
     },
     kovan: {
       url: process.env.KOVAN_URL || "",
@@ -79,38 +42,56 @@ const config: HardhatUserConfig = {
       },
     },
     rinkeby: {
-      gas: 5000000,
-      gasPrice: 20000000000,
-      url: process.env.RINKEBY_URL || "",
+      url: process.env.RINKEBY_URL,
+      gasPrice: "auto",
       accounts: {
         mnemonic: process.env.MNEMONIC,
-      }
+      },
     },
-    maticmainnet: {
-      url: "https://rpc-mainnet.maticvigil.com/",
-      gasPrice: 30000000000,
-      accounts:
-        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    goerli: {
+      url: process.env.GOERLI_URL,
+      gasPrice: "auto",
+      accounts: {
+        mnemonic: process.env.MNEMONIC,
+      },
+    },
+    
+    polygon: {
+      url: process.env.POLYGON_URL,
+      gasPrice: "auto",
+      accounts: {
+        mnemonic: process.env.MNEMONIC,
+      },
+    },
+    mumbai: {
+      url: process.env.MUMBAI_URL,
+      gasPrice: "auto",
+      accounts: {
+        mnemonic: process.env.MNEMONIC,
+      },
     }
   },
+  
   gasReporter: {
-    enabled: process.env.REPORT_GAS !== undefined,
+    enabled: process.env.REPORT_GAS == "true",
     currency: "USD",
   },
   etherscan: {
     apiKey: process.env.ETHERSCAN_API_KEY,
   },
+  // etherscan: {
+  //   apiKey: process.env.POLYGONSCAN_API_KEY,
+  // },
+
   mocha: {
     timeout: 3600000,
   },
-
   contractSizer: {
     alphaSort: false,
     disambiguatePaths: false,
-    runOnCompile: false,
+    runOnCompile: process.env.CONTRACT_SIZER == "true",
     strict: false,
   }
-
 };
 
 export default config;
