@@ -2,7 +2,7 @@ import { ethers } from "hardhat"
 import { InvestorsVesting__factory } from "../typechain";
 
 async function main() {
-    const tokenAddress = "TOKEN_ADDRESS";
+    const tokenAddress = "0xA924A06bC2Ac9Eb3C18E95fD23306ab1e77cf950";
 
     const Token = await ethers.getContractFactory("InvestorsVesting") as InvestorsVesting__factory;
     const token = await Token.deploy(tokenAddress);
