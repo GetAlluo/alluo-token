@@ -6,11 +6,17 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
+// Deployed on Ethereum Mainnet
+// https://etherscan.io/address/0x86cc79b8bf3ac9c153a6856f43eaa6d599a9423f
+
 contract PartnerVesting is ReentrancyGuard, Ownable {
     using SafeERC20 for IERC20;
 
+    // cliff period when tokens are frozen
+    uint32 public constant CLIFF_MONTHS = 0;
+
     // period of time when tokens are getting available
-    uint32 public constant VESTING_MONTHS_COUNT = 6;
+    uint32 public constant VESTING_MONTHS_COUNT = 24;
 
     // seconds in 1 month
     uint32 public constant MONTH = 2628000;
@@ -89,7 +95,7 @@ contract PartnerVesting is ReentrancyGuard, Ownable {
      * @dev Start vesting countdown. Can only be called by contract owner.
      */
     function startCountdown(address[] memory _users) external onlyOwner {
-        uint256 startTime = block.timestamp + MONTH;
+        uint256 startTime = block.timestamp + (MONTH * CLIFF_MONTHS);
         uint256 endTime = startTime + vestingPeriod;
 
         for (uint256 index = 0; index < _users.length; index++) {

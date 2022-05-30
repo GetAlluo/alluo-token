@@ -29,7 +29,8 @@ describe('Contract: PartnerVesting', () => {
     let investorsVesting: PartnerVesting;
     let token: AlluoToken;
 
-    const vestingMonthsCount = 6;
+    const cliffMonths = 0;
+    const vestingMonthsCount = 24;
     const month = 2628000;
 
     before(async function () {
@@ -50,6 +51,7 @@ describe('Contract: PartnerVesting', () => {
     });
 
     it("Should check that everything is initialized", async function () {
+        expect(await investorsVesting.CLIFF_MONTHS()).to.be.equal(cliffMonths);
         expect(await investorsVesting.VESTING_MONTHS_COUNT()).to.be.equal(vestingMonthsCount);
         expect(await investorsVesting.MONTH()).to.be.equal(month);
     });
@@ -153,7 +155,7 @@ describe('Contract: PartnerVesting', () => {
 
         await investorsVesting.startCountdown([user]);
         const blockTimestamp = await getLatestBlockTimestamp();
-        const startTime = blockTimestamp.add(month);
+        const startTime = blockTimestamp.add(month * cliffMonths);
 
         const userInfo = await investorsVesting.getUserInfo(user);
 
@@ -238,10 +240,9 @@ describe('Contract: PartnerVesting', () => {
         await investorsVesting.addPartner([user], [amount]);
         await investorsVesting.startCountdown([user]);
 
-        incrementNextBlockTimestamp(vestingMonthsCount * month);
+        incrementNextBlockTimestamp((vestingMonthsCount + cliffMonths) * month);
 
         await investorsVesting.claimToken();
-        console.log(await investorsVesting.getUserInfo(user))
         await expect(investorsVesting.claimToken()).to.be.revertedWith("Vesting: not enough tokens to claim");
     });
 
@@ -253,7 +254,7 @@ describe('Contract: PartnerVesting', () => {
         await investorsVesting.addPartner([user], [amount]);
         await investorsVesting.startCountdown([user]);
 
-        await incrementNextBlockTimestamp(((vestingMonthsCount / 2)) * month);
+        await incrementNextBlockTimestamp((cliffMonths + (vestingMonthsCount / 2)) * month);
         await mine();
 
         const userBalanceBeforeClaim = await token.balanceOf(user);
@@ -279,7 +280,7 @@ describe('Contract: PartnerVesting', () => {
         await investorsVesting.addPartner([user], [amount]);
         await investorsVesting.startCountdown([user]);
 
-        await incrementNextBlockTimestamp(((vestingMonthsCount / 4)) * month); // quater way
+        await incrementNextBlockTimestamp((cliffMonths + (vestingMonthsCount / 4)) * month); // quater way
         await mine();
 
         const userBalanceBeforeFirstClaim = await token.balanceOf(user);
@@ -287,7 +288,7 @@ describe('Contract: PartnerVesting', () => {
         const userBalanceAfterFirstClaim = await token.balanceOf(user);
         const firstIncome = userBalanceAfterFirstClaim.sub(userBalanceBeforeFirstClaim);
 
-        await incrementNextBlockTimestamp(((vestingMonthsCount / 4)) * month); // half way
+        await incrementNextBlockTimestamp((cliffMonths + (vestingMonthsCount / 4)) * month); // half way
         await mine();
 
         const userBalanceBeforeSecondClaim = await token.balanceOf(user);
@@ -313,7 +314,7 @@ describe('Contract: PartnerVesting', () => {
         await investorsVesting.addPartner([user], [amount]);
         await investorsVesting.startCountdown([user]);
 
-        incrementNextBlockTimestamp((vestingMonthsCount) * month + 1);
+        incrementNextBlockTimestamp((vestingMonthsCount + cliffMonths) * month + 1);
         await mine();
 
         const userBalanceBeforeClaim = await token.balanceOf(user);
