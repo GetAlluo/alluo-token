@@ -6,10 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-// Deployed on Ethereum Mainnet
-// https://etherscan.io/address/0x86cc79b8bf3ac9c153a6856f43eaa6d599a9423f
-
-contract TeamVesting is ReentrancyGuard, Ownable {
+contract PartnerVesting is ReentrancyGuard, Ownable {
     using SafeERC20 for IERC20;
 
     // period of time when tokens are getting available
@@ -63,7 +60,7 @@ contract TeamVesting is ReentrancyGuard, Ownable {
      * @param _user  An array of users' addresses.
      * @param _amount An array of amount values to be assigned to users respectively.
      */
-    function addPartnerUser(address[] memory _user, uint256[] memory _amount)
+    function addPartner(address[] memory _user, uint256[] memory _amount)
         public
         onlyOwner
     {
