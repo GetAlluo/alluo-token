@@ -30,7 +30,7 @@ describe('Contract: PartnerVesting', () => {
     let token: AlluoToken;
 
     const cliffMonths = 0;
-    const vestingMonthsCount = 24;
+    const vestingMonthsCount = 4;
     const month = 2628000;
 
     before(async function () {

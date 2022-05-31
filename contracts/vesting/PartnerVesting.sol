@@ -16,7 +16,7 @@ contract PartnerVesting is ReentrancyGuard, Ownable {
     uint32 public constant CLIFF_MONTHS = 0;
 
     // period of time when tokens are getting available
-    uint32 public constant VESTING_MONTHS_COUNT = 24;
+    uint32 public constant VESTING_MONTHS_COUNT = 4;
 
     // seconds in 1 month
     uint32 public constant MONTH = 2628000;
