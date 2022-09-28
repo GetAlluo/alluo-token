@@ -5,9 +5,13 @@ import "@openzeppelin/contracts/interfaces/IERC20Metadata.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/utils/Address.sol";
 
 contract UniversalVesting is ReentrancyGuard, AccessControl {
     using EnumerableSet for EnumerableSet.UintSet;
+    using Address for address;
+    using SafeERC20 for IERC20;
 
     mapping(address => uint256) public debtByToken;
     mapping(uint256 => Recipient) public recipients;
@@ -50,7 +54,7 @@ contract UniversalVesting is ReentrancyGuard, AccessControl {
         require(isApprovedToken[token], "UniversalVesting: tkn !approved");
 
         if (transferFrom) {
-            IERC20(token).transferFrom(
+            IERC20(token).safeTransferFrom(
                 msg.sender,
                 address(this),
                 totalAllocation
@@ -95,14 +99,14 @@ contract UniversalVesting is ReentrancyGuard, AccessControl {
         );
 
         if (totalAllocation < _recipient.totalAllocation) {
-            IERC20(_recipient.token).transfer(
+            IERC20(_recipient.token).safeTransfer(
                 _recipient.admin,
                 _recipient.totalAllocation - totalAllocation
             );
         } else if (
             totalAllocation > _recipient.totalAllocation && transferFrom
         ) {
-            IERC20(_recipient.token).transferFrom(
+            IERC20(_recipient.token).safeTransferFrom(
                 msg.sender,
                 address(this),
                 totalAllocation - _recipient.totalAllocation
@@ -169,6 +173,13 @@ contract UniversalVesting is ReentrancyGuard, AccessControl {
         isApprovedToken[token] = status;
     }
 
+    function execute(address to, bytes memory data)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        to.functionCall(data);
+    }
+
     function getIdsForUser(address user)
         external
         view
@@ -219,7 +230,7 @@ contract UniversalVesting is ReentrancyGuard, AccessControl {
             toDeleteFromList = true;
         }
 
-        IERC20(_recipient.token).transfer(_recipient.recipient, payout);
+        IERC20(_recipient.token).safeTransfer(_recipient.recipient, payout);
     }
 
     function _calculatePayout(Recipient memory _recipient)
