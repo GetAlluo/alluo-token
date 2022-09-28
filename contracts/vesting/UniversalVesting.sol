@@ -21,15 +21,16 @@ contract UniversalVesting is ReentrancyGuard, AccessControl {
     uint256 public nextId = 0;
     bool public isPublic = false;
 
+    // think about packing it?? using smaller numbers
     struct Recipient {
         uint256 cliffPeriod;
         uint256 vestingWeeks;
         uint256 totalAllocation;
         uint256 paidOut;
+        uint224 startTimestamp;
         address admin;
         address token;
         address recipient;
-        uint256 startTimestamp;
     }
 
     modifier requirePublic() {
@@ -73,10 +74,10 @@ contract UniversalVesting is ReentrancyGuard, AccessControl {
             vestingWeeks,
             totalAllocation,
             0,
+            uint224(block.timestamp),
             msg.sender,
             token,
-            recipient,
-            block.timestamp
+            recipient
         );
         recipientsSet[recipient].add(nextId);
 
