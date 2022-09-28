@@ -44,9 +44,19 @@ contract UniversalVesting is ReentrancyGuard, AccessControl {
         uint256 vestingWeeks,
         address recipient,
         uint256 totalAllocation,
-        address token
+        address token,
+        bool transferFrom
     ) external nonReentrant requirePublic {
         require(isApprovedToken[token], "UniversalVesting: tkn !approved");
+
+        if (transferFrom) {
+            IERC20(token).transferFrom(
+                msg.sender,
+                address(this),
+                totalAllocation
+            );
+        }
+
         uint256 _debtByToken = debtByToken[token] + totalAllocation;
         require(
             _debtByToken <= IERC20(token).balanceOf(address(this)),
@@ -74,7 +84,8 @@ contract UniversalVesting is ReentrancyGuard, AccessControl {
         uint256 cliffPeriod,
         uint256 vestingWeeks,
         address recipient,
-        uint256 totalAllocation
+        uint256 totalAllocation,
+        bool transferFrom
     ) external nonReentrant requirePublic {
         Recipient memory _recipient = recipients[id];
         require(msg.sender == _recipient.admin, "UniversalVesting: not admin");
@@ -82,6 +93,21 @@ contract UniversalVesting is ReentrancyGuard, AccessControl {
             totalAllocation >= _recipient.paidOut,
             "UniversalVesting: low allocation"
         );
+
+        if (totalAllocation < _recipient.totalAllocation) {
+            IERC20(_recipient.token).transfer(
+                _recipient.admin,
+                _recipient.totalAllocation - totalAllocation
+            );
+        } else if (
+            totalAllocation > _recipient.totalAllocation && transferFrom
+        ) {
+            IERC20(_recipient.token).transferFrom(
+                msg.sender,
+                address(this),
+                totalAllocation - _recipient.totalAllocation
+            );
+        }
 
         uint256 newDebt = debtByToken[_recipient.token] -
             _recipient.totalAllocation +
@@ -91,13 +117,6 @@ contract UniversalVesting is ReentrancyGuard, AccessControl {
             "UniversalVesting: low balance"
         );
         debtByToken[_recipient.token] = newDebt;
-
-        if (totalAllocation < _recipient.totalAllocation) {
-            IERC20(_recipient.token).transfer(
-                _recipient.admin,
-                _recipient.totalAllocation - totalAllocation
-            );
-        }
 
         if (recipient != _recipient.recipient) {
             recipientsSet[_recipient.recipient].remove(id);
