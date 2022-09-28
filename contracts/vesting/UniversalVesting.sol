@@ -94,6 +94,10 @@ contract UniversalVesting is ReentrancyGuard, AccessControl {
         Recipient memory _recipient = recipients[id];
         require(msg.sender == _recipient.admin, "UniversalVesting: not admin");
         require(
+            isApprovedToken[_recipient.token],
+            "UniversalVesting: tkn !approved"
+        );
+        require(
             totalAllocation >= _recipient.paidOut,
             "UniversalVesting: low allocation"
         );
@@ -113,9 +117,9 @@ contract UniversalVesting is ReentrancyGuard, AccessControl {
             );
         }
 
-        uint256 newDebt = debtByToken[_recipient.token] -
-            _recipient.totalAllocation +
-            totalAllocation;
+        uint256 newDebt = debtByToken[_recipient.token] +
+            totalAllocation -
+            _recipient.totalAllocation;
         require(
             newDebt <= IERC20(_recipient.token).balanceOf(address(this)),
             "UniversalVesting: low balance"
@@ -171,13 +175,6 @@ contract UniversalVesting is ReentrancyGuard, AccessControl {
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
         isApprovedToken[token] = status;
-    }
-
-    function execute(address to, bytes memory data)
-        external
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
-        to.functionCall(data);
     }
 
     function getIdsForUser(address user)
