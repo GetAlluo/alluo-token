@@ -29,10 +29,10 @@ contract UniversalVesting is ReentrancyGuard, AccessControl {
     }
 
     modifier requirePublic() {
-        _;
         if (!hasRole(DEFAULT_ADMIN_ROLE, msg.sender)) {
             require(isPublic, "UniversalVesting: not public yet");
         }
+        _;
     }
 
     constructor(address gnosis) {
