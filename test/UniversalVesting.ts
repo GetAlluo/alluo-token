@@ -36,10 +36,12 @@ describe("UniversalVesting", async () => {
 
     beforeEach(async () => {
         const Vesting = await ethers.getContractFactory("UniversalVesting");
-        vesting = await Vesting.deploy();
+        vesting = await Vesting.deploy(signers[0].address);
 
         const AlluoToken = await ethers.getContractFactory("AlluoToken");
         token = await AlluoToken.deploy(signers[0].address);
+
+        await vesting.setTokenApproveStatus(token.address, true);
     });
 
     it("Should check initial values", async () => {
@@ -64,7 +66,8 @@ describe("UniversalVesting", async () => {
             vestingWeeks,
             recipient.address,
             amount,
-            token.address
+            token.address,
+            false
         );
         const timestamp = await getLatestBlockTimestamp();
         const recipientSet = await vesting.getIdsForUser(recipient.address);
@@ -96,7 +99,8 @@ describe("UniversalVesting", async () => {
             vestingWeeks,
             recipient.address,
             amount,
-            token.address
+            token.address,
+            false
         );
 
         await expect(tx).to.be.revertedWith("UniversalVesting: low balance");
@@ -115,7 +119,8 @@ describe("UniversalVesting", async () => {
             vestingWeeks,
             recipient.address,
             amount,
-            token.address
+            token.address,
+            false
         );
         const timestamp = await getLatestBlockTimestamp();
 
@@ -131,7 +136,8 @@ describe("UniversalVesting", async () => {
             newCliffPeriod,
             newVestingWeeks,
             newRecipient.address,
-            newAmount
+            newAmount,
+            false
         )
 
         const oldRecipientSet = await vesting.getIdsForUser(recipient.address);
@@ -167,7 +173,8 @@ describe("UniversalVesting", async () => {
             vestingWeeks,
             recipient.address,
             amount,
-            token.address
+            token.address,
+            false
         );
         const timestamp = await getLatestBlockTimestamp();
 
@@ -182,7 +189,8 @@ describe("UniversalVesting", async () => {
             newCliffPeriod,
             newVestingWeeks,
             recipient.address,
-            newAmount
+            newAmount,
+            false
         )
 
         const recipientSet = await vesting.getIdsForUser(recipient.address);
@@ -210,13 +218,15 @@ describe("UniversalVesting", async () => {
         const recipient = signers[1];
 
         await token.mint(vesting.address, amount);
+        await vesting.setPublicStatus(true);
 
         await vesting.addRecipient(
             cliffPeriod,
             vestingWeeks,
             recipient.address,
             amount,
-            token.address
+            token.address,
+            false
         );
 
         const newAmount = await parseAlluo("200.0");
@@ -229,7 +239,8 @@ describe("UniversalVesting", async () => {
             newCliffPeriod,
             newVestingWeeks,
             recipient.address,
-            newAmount
+            newAmount,
+            false
         )
 
         await expect(tx).to.be.revertedWith("UniversalVesting: not admin");
@@ -248,7 +259,8 @@ describe("UniversalVesting", async () => {
             vestingWeeks,
             recipient.address,
             amount,
-            token.address
+            token.address,
+            false
         );
 
         await incrementNextBlockTimestamp(cliffPeriod + 1);
@@ -260,7 +272,8 @@ describe("UniversalVesting", async () => {
             cliffPeriod,
             vestingWeeks,
             recipient.address,
-            newAmount
+            newAmount,
+            false
         );
 
         await expect(tx).to.be.revertedWith("UniversalVesting: low allocation");
@@ -279,7 +292,8 @@ describe("UniversalVesting", async () => {
             vestingWeeks,
             recipient.address,
             amount,
-            token.address
+            token.address,
+            false
         );
 
         const newAmount = await parseAlluo("200.0");
@@ -289,7 +303,8 @@ describe("UniversalVesting", async () => {
             cliffPeriod,
             vestingWeeks,
             recipient.address,
-            newAmount
+            newAmount,
+            false
         );
 
         await expect(tx).to.be.revertedWith("UniversalVesting: low balance");
@@ -309,7 +324,8 @@ describe("UniversalVesting", async () => {
             vestingWeeks,
             recipient.address,
             amount,
-            token.address
+            token.address,
+            false
         );
         const timestamp = await getLatestBlockTimestamp();
 
@@ -326,7 +342,7 @@ describe("UniversalVesting", async () => {
         expect(recipientData.startTimestamp).to.be.equal(timestamp);
     })
 
-    it("Should change admin (called by not current admin)", async () => {
+    it("Should not change admin (called by not current admin)", async () => {
         const amount = await parseAlluo("100.0");
         const cliffPeriod = 3600;
         const vestingWeeks = 8;
@@ -334,13 +350,15 @@ describe("UniversalVesting", async () => {
         const notAdmin = signers[2];
 
         await token.mint(vesting.address, amount);
+        await vesting.setPublicStatus(true);
 
         await vesting.addRecipient(
             cliffPeriod,
             vestingWeeks,
             recipient.address,
             amount,
-            token.address
+            token.address,
+            false
         );
 
         const tx = vesting.connect(notAdmin).changeAdmin(0, notAdmin.address);
@@ -361,7 +379,8 @@ describe("UniversalVesting", async () => {
             vestingWeeks,
             recipient.address,
             amount,
-            token.address
+            token.address,
+            false
         );
 
         await incrementNextBlockTimestamp(cliffPeriod + 1);
@@ -390,7 +409,8 @@ describe("UniversalVesting", async () => {
             vestingWeeks,
             recipient.address,
             amount,
-            token.address
+            token.address,
+            false
         );
 
         await incrementNextBlockTimestamp((vestingWeeks * week) + 1);
